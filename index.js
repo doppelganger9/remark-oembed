@@ -14,9 +14,16 @@ const fetchOembed = async (endpoint /* { url: any; params: any }*/) => {
   return response.data;
 }
 
-const fetchOembededProviders = async () => {
+const fetchOembededProviders = async (providerOptions = {}) => {
   const response = await axios.get(OEMBED_PROVIDERS_URL);
-  return response.data;
+  const providers = response.data;
+  Object.keys(providerOptions).forEach(key => {
+    const found = providers.find(p => p.provider_name === key);
+    if (found) {
+      found.params = providerOptions[key];
+    }
+  });
+  return providers;
 }
 
 const getProviderEndpointForLinkUrl = (linkUrl/*: string*/, providers/*: any*/) => {
@@ -116,7 +123,7 @@ function attacher(options) {
   const replaceParent = !!options.replaceParent;
 
   const transformer = async (tree, _file) => {
-    const providers = await fetchOembededProviders();
+    const providers = await fetchOembededProviders(options);
     const nodes = selectPossibleOembedLinkNodes(tree, usePrefix, replaceParent);
     await Promise.all(nodes.map(node => processNode(node, providers)));
     return tree;

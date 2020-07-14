@@ -72,6 +72,43 @@ Check it out 👆
 
 Converts URLs surrounded by newlines into embeds.
 
+#### usePrefix
+
+`remark().use(oembed)` is the same as `remark().use(oembed({usePrefix: false, replaceParent: false}))`.
+
+If you `usePrefix: true`, you must use a code block with `oembed:` as prefix:
+
+<!-- prettier-ignore -->
+```markdown
+Hey this is a nice youtube video about making modern react apps with gatsby:
+
+`oembed: https://www.youtube.com/watch?v=GN0xHSk2P8Q`
+
+Check it out 👆
+```
+
+#### replaceParent
+
+Sometimes, like with Twitter, the OEmbed HTML contains block HTML elements, which should make the paragraph end. So there may be a trailing `</p>` after stringifying it.
+
+If that's the case, you can replace the parent paragraph node with the child link or inline code node using `replaceParent: true`.
+
+`remark().use(oembed({replaceParent: true}))`
+
+See `test/test.js` for examples.
+
+### OEmbed API additional params
+
+For example, [Twitter OEmbed API documentation](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/oembed-api) say it is possible to add parameters in addition to url.
+
+You might want to avoid loading the script and maybe change the language.
+
+In the plugin options, pass the provider name and the additional parameters to pass to the oembed provider call:
+
+`remark().use(oembed({Twitter: {lang: 'fr-FR', omit_script: 1}))`
+
+(For this specific example, you'll need to add `<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>` in your markdown, as the plugin will ask the OEmbed Twitter API to omit them.)
+
 ## Contribute
 
 See [`contributing.md` in `remarkjs/remark`][contribute] for ways to get

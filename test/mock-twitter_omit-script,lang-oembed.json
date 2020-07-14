@@ -1,0 +1,13 @@
+{
+    "url": "https:\/\/twitter.com\/stefanprodan\/status\/1089848015626686465",
+    "author_name": "Stefan Prodan",
+    "author_url": "https:\/\/twitter.com\/stefanprodan",
+    "html": "\u003Cblockquote class=\"twitter-tweet\" data-lang=\"fr-FR\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EOh once you enable \u003Ca href=\"https:\/\/twitter.com\/github?ref_src=twsrc%5Etfw\"\u003E@GitHub\u003C\/a\u003E Actions on a repo no other integration will work. For example trying to push a git tag using a deploy key will error out with: &quot;refusing to allow an integration to create .github\/main.workflow&quot;\u003C\/p\u003E&mdash; Stefan Prodan (@stefanprodan) \u003Ca href=\"https:\/\/twitter.com\/stefanprodan\/status\/1089848015626686465?ref_src=twsrc%5Etfw\"\u003E28 janvier 2019\u003C\/a\u003E\u003C\/blockquote\u003E\n",
+    "width": 550,
+    "height": null,
+    "type": "rich",
+    "cache_age": "3153600000",
+    "provider_name": "Twitter",
+    "provider_url": "https:\/\/twitter.com",
+    "version": "1.0"
+}

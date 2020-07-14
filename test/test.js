@@ -2,13 +2,25 @@ const test = require("tape");
 const remark = require('remark');
 const remarkMarkdown = require('remark-parse');
 const remark2rehype = require('remark-rehype');
+const axios = require('axios');
 const moxios = require('moxios');
 const hast_to_html = require('@starptech/prettyhtml-hast-to-html');
 const oembed = require('..');
 const fs = require('fs');
 
-// TODO mock axios ?
-function prepareMoxios() {``
+// to log Axios requests.
+axios.interceptors.request.use(request => {
+  console.log('Starting Request', request)
+  return request
+})
+
+// to log Axios responses.
+axios.interceptors.response.use(response => {
+  console.log('Response:', response)
+  return response
+})
+
+function prepareMoxios(twitterWithOptions = false) {
   moxios.install();
   moxios.stubRequest('https://oembed.com/providers.json', {
     status: 200,
@@ -18,10 +30,17 @@ function prepareMoxios() {``
     status: 200,
     responseText: fs.readFileSync('./test/mock-youtube-oembed.json', { encoding: 'utf-8'}),
   });
-  moxios.stubRequest(/https:\/\/publish.twitter.com\/oembed.*/, {
-    status: 200,
-    responseText: fs.readFileSync('./test/mock-twitter-oembed.json', { encoding: 'utf-8'}),
-  });
+  if (twitterWithOptions) {
+    moxios.stubRequest(/https:\/\/publish.twitter.com\/oembed.*/, {
+      status: 200,
+      responseText: fs.readFileSync('./test/mock-twitter_omit-script,lang-oembed.json', { encoding: 'utf-8'}),
+    });  
+  } else {
+    moxios.stubRequest(/https:\/\/publish.twitter.com\/oembed.*/, {
+      status: 200,
+      responseText: fs.readFileSync('./test/mock-twitter-oembed.json', { encoding: 'utf-8'}),
+    });
+  }
   moxios.stubRequest(/https:\/\/giphy.com\/services\/oembed.*/, {
     status: 200,
     responseText: fs.readFileSync('./test/mock-giphy-oembed.json', { encoding: 'utf-8'}),
@@ -217,6 +236,45 @@ Check it out 👆
     remark()
       .use(remarkMarkdown)
       .use(oembed, {usePrefix: true, replaceParent: true})
+      .use(remark2rehype, {
+        allowDangerousHtml: true,
+        allowDangerousCharacters: true,
+      })
+      .use(stringify, {
+        allowDangerousHtml: true,
+        allowDangerousCharacters: true,
+      })
+      .process(markdown, function(err, file) {
+        if (err) {
+          throw err;
+        }
+        resolve(t.equal(String(file), markdownWithEmbed));
+      });
+  });
+  moxios.uninstall();
+});
+
+
+test('oembed Twitter with options, a lots of plugins and inline code prefix and replace parent', async (t) => {
+  t.plan(1);
+  prepareMoxios(true);
+
+  const markdown = `Twitter embed:
+
+\`oembed: https://twitter.com/stefanprodan/status/1089848015626686465\`
+
+Check it out 👆
+`;
+
+  const markdownWithEmbed = `<p>Twitter embed:</p>
+<blockquote class="twitter-tweet" data-lang="fr-FR"><p lang="en" dir="ltr">Oh once you enable <a href="https://twitter.com/github?ref_src=twsrc%5Etfw">@GitHub</a> Actions on a repo no other integration will work. For example trying to push a git tag using a deploy key will error out with: &quot;refusing to allow an integration to create .github/main.workflow&quot;</p>&mdash; Stefan Prodan (@stefanprodan) <a href="https://twitter.com/stefanprodan/status/1089848015626686465?ref_src=twsrc%5Etfw">28 janvier 2019</a></blockquote>
+
+<p>Check it out 👆</p>`;
+
+  await new Promise(resolve => {
+    remark()
+      .use(remarkMarkdown)
+      .use(oembed, {usePrefix: true, replaceParent: true, Twitter: {lang: 'fr-FR', omit_script: 1}})
       .use(remark2rehype, {
         allowDangerousHtml: true,
         allowDangerousCharacters: true,
